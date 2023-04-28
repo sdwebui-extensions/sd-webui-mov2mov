@@ -131,6 +131,9 @@
   max-height: 480px;
   min-height: 480px;
 }
+/* #mov2mov_input_video_info {
+  display: none;
+} */
 
 #mov2mov_video video {
   height: 480px;

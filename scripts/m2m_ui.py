@@ -220,6 +220,15 @@ def on_ui_tabs():
                     with gr.TabItem('Input video', id='mov2mov', elem_id=f"{html_id}_mov2mov_tab") as tab_mov2mov:
                         init_mov = gr.Video(label="Video for mov2mov", elem_id=f"{html_id}_mov", show_label=False,
                                             source="upload")  # .style(height=480)
+                        init_mov.change(None, None, None, _js="() => { startMov2movVideoHelper() }")
+
+                # Video dimensions helper
+                with FormRow(elem_id="mov2mov_input_video_info"):
+                    gr.Textbox(label="Input video width", elem_id="mov2mov_input_video_info_width",
+                               value="N/A", interactive=False)
+                    gr.Textbox(label="Input video height", elem_id="mov2mov_input_video_info_height",
+                               value="N/A", interactive=False)
+                    
 
                 with FormRow():
                     resize_mode = gr.Radio(label="Resize mode", elem_id="resize_mode",
