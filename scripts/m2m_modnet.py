@@ -38,7 +38,7 @@ def get_model(ckpt_name):
 def create_modnet():
     ctrls = ()
     with gr.Group():
-        with gr.Accordion("ModNet", open=True):
+        with gr.Accordion("ModNet for mov2mov", open=True):
             background_image = gr.Image(label='Background', type='numpy', elem_id='modnet_background_image').style()
             background_movie = gr.Video(label='Background', elem_id='modnet_background_movie').style()
             enable = gr.Checkbox(label='Enable', value=False, )
@@ -55,7 +55,7 @@ def create_modnet():
             movie_frames = gr.Slider(minimum=10,
                                      maximum=60,
                                      step=1,
-                                     label='Movie Frames',
+                                     label='Video frames',
                                      elem_id='modnet_movie_frames',
                                      value=30)
             ctrls += (movie_frames,)
