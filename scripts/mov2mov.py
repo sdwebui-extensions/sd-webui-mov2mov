@@ -27,6 +27,11 @@ def process_mov2mov(p, mov_file, movie_frames, max_frames, resize_mode, w, h, ge
                     args):
     processing.fix_seed(p)
 
+    # Warn the user if ModNet is enabled without selecting a model, then disable it to prevent errors
+    if (modnet_enable) and (modnet_model is None or modnet_model.lower() == 'none'):
+      print('\nWarning: ModNet for mov2mov is enabled without selecting a model, skipping use of ModNet\n')
+      modnet_enable = False
+
     # 判断是不是多prompt
     re_prompts = re.findall(r'\*([0-9]+):(.*?)\|\|', p.prompt, re.DOTALL)
     re_negative_prompts = re.findall(r'\*([0-9]+):(.*?)\|\|', p.negative_prompt, re.DOTALL)
