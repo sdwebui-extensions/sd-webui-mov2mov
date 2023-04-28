@@ -10,19 +10,18 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torchvision.transforms as transforms
-from scripts.modnet.modnet import MODNet
+import modules.paths as ph
 
 """
 from modnet-entry("https://github.com/RimoChan/modnet-entry")
 """
 
-script_path = scripts.basedir()
-models_path = os.path.join(script_path, "models")
-modnet_models = ['none'] + [model for model in os.listdir(models_path) if model.endswith('.ckpt')]
+modnet_models_path = ph.models_path + '/mov2mov-ModNet'
+modnet_models = ['none'] + [model for model in os.listdir(modnet_models_path) if model.endswith('.ckpt')]
 
 
 def get_model(ckpt_name):
-    ckpt_path = os.path.join(models_path, ckpt_name)
+    ckpt_path = os.path.join(modnet_models_path, ckpt_name)
     modnet = MODNet(backbone_pretrained=False)
     modnet = nn.DataParallel(modnet)
     if torch.cuda.is_available():
