@@ -1,10 +1,10 @@
 import launch
+import os
 
+req_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), "requirements.txt")
 
-if not launch.is_installed("cv2"):
-    print('Installing requirements for Mov2mov')
-    launch.run_pip("install opencv-python", "requirements for opencv")
-
-if not launch.is_installed('ffmpeg'):
-    print('Installing requirements for Mov2mov')
-    launch.run_pip("install ffmpeg", "requirements for ffmpeg")
+with open(req_file) as file:
+    for lib in file:
+        lib = lib.strip()
+        if not launch.is_installed(lib):
+            launch.run_pip(f"install {lib}", f"mov2mov requirement: {lib}")
