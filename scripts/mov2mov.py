@@ -91,8 +91,14 @@ def process_mov2mov(p, mov_file, movie_frames, max_frames, resize_mode, w, h, ge
         if proc is None:
             print(f'current progress: {i + 1}/{max_frames}')
             processed = process_images(p)
-            # 只取第一张
-            gen_image = processed.images[0]
+            # Get generated image
+            try:
+                gen_image = processed.images[0]
+            except IndexError as e:
+                # Replace generated image with black image if something went wrong
+                print(f'Replaced frame {i + 1} with a black frame because of an image generation error: {e}')
+                gen_image = Image.new('RGB', (w, h), 'black')
+            
 
             # 合成图像
             if modnet_enable and modnet_merge_background_mode != 0:
