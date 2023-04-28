@@ -120,6 +120,11 @@ def process_mov2mov(p, mov_file, movie_frames, max_frames, resize_mode, w, h, ge
                 b_img = modules.images.resize_image(resize_mode, img, w, h)
                 # 合成
                 _, mask = infer2(modnet_network, b_img)
+
+                # Resize image before composite to avoid 'ValueError: images do not match'
+                gen_image = modules.images.resize_image(resize_mode, gen_image, w, h)
+
+                # Run composite
                 gen_image = Image.composite(gen_image, backup, mask)
 
             # if extract_characters and merge_background:
