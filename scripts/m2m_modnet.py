@@ -11,6 +11,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torchvision.transforms as transforms
 import modules.paths as ph
+from scripts.modnet.modnet import MODNet
 
 """
 from modnet-entry("https://github.com/RimoChan/modnet-entry")
