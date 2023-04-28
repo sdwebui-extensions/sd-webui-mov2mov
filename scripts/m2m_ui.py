@@ -166,11 +166,7 @@ def create_modnet(html_id):
                 gr.HTML(
                     value='''
                       <p>
-                        <b>Optional function</b> <br>
-                        The function is to key out the characters and redraw them separately <br>
-                        After redrawing, you can choose to clear the background, synthesize the original background, synthesize the green screen, synthesize the picture, synthesize the video <br>
-                        The scaling setting is to set the scaling of the background, if you don't know how to debug, set it to the same as the original video <br>
-                        Compositing video way is also to choose the frame rate, extract pictures for compositing, please note to ensure that the background video length is greater than the original video length <br>
+                        Refer to the <a href="https://github.com/DavG25/sd-webui-mov2mov/wiki/ModNet" target="_blank" style="text-decoration: underline;">mov2mov wiki</a> for more information on how to use ModNet
                       </p>
                     ''')
 
