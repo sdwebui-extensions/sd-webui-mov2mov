@@ -27,6 +27,21 @@ def process_mov2mov(p, mov_file, movie_frames, max_frames, resize_mode, w, h, ge
                     args):
     processing.fix_seed(p)
 
+    # ModNet checks
+    if (modnet_enable):
+        # Warn the user if ModNet is enabled without selecting a model, then disable it to prevent errors
+        if modnet_model.lower() == 'none':
+          print('\nError: ModNet for mov2mov is enabled without selecting a model, please select a model for ModNet\n')
+          return
+        # Warn the user if ModNet image mode is enabled without selecting an image
+        if modnet_merge_background_mode == 3 and modnet_background_image is None:
+          print('\nError: ModNet for mov2mov is enabled in Image mode without a valid image, please select a valid image for ModNet\n')
+          return
+        # Warn the user if ModNet video mode is enabled without selecting a video
+        if modnet_merge_background_mode == 4 and modnet_background_movie is None:
+          print('\nError: ModNet for mov2mov is enabled in Video mode without a valid video, please select a valid video for ModNet\n')
+          return
+
     # 判断是不是多prompt
     re_prompts = re.findall(r'\*([0-9]+):(.*?)\|\|', p.prompt, re.DOTALL)
     re_negative_prompts = re.findall(r'\*([0-9]+):(.*?)\|\|', p.negative_prompt, re.DOTALL)
@@ -91,8 +106,14 @@ def process_mov2mov(p, mov_file, movie_frames, max_frames, resize_mode, w, h, ge
         if proc is None:
             print(f'current progress: {i + 1}/{max_frames}')
             processed = process_images(p)
-            # 只取第一张
-            gen_image = processed.images[0]
+            # Get generated image
+            try:
+                gen_image = processed.images[0]
+            except IndexError as e:
+                # Replace generated image with black image if something went wrong
+                print(f'Replaced frame {i + 1} with a black frame because of an image generation error: {e}')
+                gen_image = Image.new('RGB', (w, h), 'black')
+            
 
             # 合成图像
             if modnet_enable and modnet_merge_background_mode != 0:
@@ -114,6 +135,11 @@ def process_mov2mov(p, mov_file, movie_frames, max_frames, resize_mode, w, h, ge
                 b_img = modules.images.resize_image(resize_mode, img, w, h)
                 # 合成
                 _, mask = infer2(modnet_network, b_img)
+
+                # Resize image before composite to avoid 'ValueError: images do not match'
+                gen_image = modules.images.resize_image(resize_mode, gen_image, w, h)
+
+                # Run composite
                 gen_image = Image.composite(gen_image, backup, mask)
 
             # if extract_characters and merge_background:
@@ -129,20 +155,20 @@ def process_mov2mov(p, mov_file, movie_frames, max_frames, resize_mode, w, h, ge
 
     if generate_mov_mode == 0:
         r_f = '.mp4'
-        mode = 'mp4v'
+        codec = 'libx264'
     elif generate_mov_mode == 1:
         r_f = '.mp4'
-        mode = 'avc1'
+        codec = 'libx264'
     elif generate_mov_mode == 2:
         r_f = '.avi'
-        mode = 'XVID'
+        codec = 'libxvid'
 
-    print(f'Start generating {r_f} file')
+    out_path=os.path.join(shared.opts.data.get("mov2mov_output_dir", mov2mov_output_dir), str(int(time.time())) + r_f)
 
-    video = images_to_video(generate_images, movie_frames, mode, w, h,
-                            os.path.join(shared.opts.data.get("mov2mov_output_dir", mov2mov_output_dir),
-                                         str(int(time.time())) + r_f, ))
-    print(f'The generation is complete, the directory::{video}')
+    video = images_to_video(generate_images, movie_frames, w, h, codec, out_path)
+
+    if video is not None:
+        print(f'Video generation completed, file saved in: {video}')
 
     return video
 
@@ -176,8 +202,10 @@ def mov2mov(id_task: str,
             width,
             resize_mode,
             override_settings_text, *args):
+    # Stop if no input video was provided
     if not mov_file:
-        raise Exception('Error！ Please add a video file!')
+        print('Error: mov2mov generation was started without a valid video, please select a valid input video for mov2mov')
+        return
 
     override_settings = create_override_settings_dict(override_settings_text)
     assert 0. <= denoising_strength <= 1., 'can only work with strength in [0.0, 1.0]'

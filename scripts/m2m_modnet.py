@@ -10,19 +10,19 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torchvision.transforms as transforms
+import modules.paths as ph
 from scripts.modnet.modnet import MODNet
 
 """
 from modnet-entry("https://github.com/RimoChan/modnet-entry")
 """
 
-script_path = scripts.basedir()
-models_path = os.path.join(script_path, "models")
-modnet_models = ['none'] + [model for model in os.listdir(models_path) if model.endswith('.ckpt')]
+modnet_models_path = ph.models_path + '/mov2mov-ModNet'
+modnet_models = ['none'] + [model for model in os.listdir(modnet_models_path) if model.endswith('.ckpt')]
 
 
 def get_model(ckpt_name):
-    ckpt_path = os.path.join(models_path, ckpt_name)
+    ckpt_path = os.path.join(modnet_models_path, ckpt_name)
     modnet = MODNet(backbone_pretrained=False)
     modnet = nn.DataParallel(modnet)
     if torch.cuda.is_available():
@@ -38,7 +38,7 @@ def get_model(ckpt_name):
 def create_modnet():
     ctrls = ()
     with gr.Group():
-        with gr.Accordion("ModNet", open=True):
+        with gr.Accordion("ModNet for mov2mov", open=True):
             background_image = gr.Image(label='Background', type='numpy', elem_id='modnet_background_image').style()
             background_movie = gr.Video(label='Background', elem_id='modnet_background_movie').style()
             enable = gr.Checkbox(label='Enable', value=False, )
@@ -55,7 +55,7 @@ def create_modnet():
             movie_frames = gr.Slider(minimum=10,
                                      maximum=60,
                                      step=1,
-                                     label='Movie Frames',
+                                     label='Video frames',
                                      elem_id='modnet_movie_frames',
                                      value=30)
             ctrls += (movie_frames,)

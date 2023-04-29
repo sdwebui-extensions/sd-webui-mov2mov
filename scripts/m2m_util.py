@@ -1,6 +1,7 @@
 import os.path
 
 import cv2
+import imageio
 import numpy
 
 
@@ -63,20 +64,29 @@ def get_mov_all_images(file, frames):
     return image_list
 
 
-def images_to_video(images, frames, mode, w, h, out_path):
+def images_to_video(images, frames, w, h, codec, out_path):
     # 判断out_path是否存在,不存在则创建
     if not os.path.exists(os.path.dirname(out_path)):
         os.makedirs(os.path.dirname(out_path), exist_ok=True)
 
-    fourcc = cv2.VideoWriter_fourcc(*mode)
-    if len(images) > 0:
-        img = images[0]
-        img_width, img_height = img.size
-        w = img_width
-        h = img_height
-    video = cv2.VideoWriter(out_path, fourcc, frames, (w, h))
-    for image in images:
-        img = cv2.cvtColor(numpy.asarray(image), cv2.COLOR_RGB2BGR)
-        video.write(img)
-    video.release()
-    return out_path
+    # TODO: make macro_block_size dynamic, based on video size - see https://github.com/imageio/imageio-ffmpeg
+    video = imageio.v2.get_writer(out_path, format='ffmpeg', mode='I', fps=frames, codec=codec, macro_block_size=1)
+    is_valid_video = False
+    for i, image in enumerate(images):
+        # We could compare image dimensions to prevent "ValueError: All images in a movie should have same size" on invalid images
+        # but using "try" should be more efficient in this case
+        try:
+            # Append current frame
+            video.append_data(numpy.asarray(image))
+            is_valid_video = True
+        except:
+            # Skip current frame
+            print(f'Skipping frame {i+1} due to invalid image generation')
+    # Write final video
+    if is_valid_video is True:
+        video.close()
+        return out_path
+    else:
+        print('\nWarning: no frames were generated for the mov2mov video\n')
+        return None
+    
