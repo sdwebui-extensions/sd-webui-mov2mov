@@ -253,9 +253,6 @@ def mov2mov(id_task: str,
     p.scripts = scripts.scripts_img2img
     p.script_args = args
 
-    if shared.cmd_opts.enable_console_prompts:
-        print(f"\nmov2mov: {prompt}", file=shared.progress_print_out)
-
     p.extra_generation_params["Mask blur"] = mask_blur
 
     print(f'\nStart parsing the number of mov frames')
