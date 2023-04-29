@@ -202,8 +202,10 @@ def mov2mov(id_task: str,
             width,
             resize_mode,
             override_settings_text, *args):
+    # Stop if no input video was provided
     if not mov_file:
-        raise Exception('Error！ Please add a video file!')
+        print('Error: mov2mov generation was started without a valid video, please select a valid input video for mov2mov')
+        return
 
     override_settings = create_override_settings_dict(override_settings_text)
     assert 0. <= denoising_strength <= 1., 'can only work with strength in [0.0, 1.0]'
