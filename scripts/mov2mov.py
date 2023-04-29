@@ -271,8 +271,6 @@ def mov2mov(id_task: str,
     shared.total_tqdm.clear()
 
     generation_info_js = processed.js()
-    if opts.samples_log_stdout:
-        print(generation_info_js)
 
     if opts.do_not_show_images:
         processed.images = []
