@@ -64,14 +64,29 @@ def get_mov_all_images(file, frames):
     return image_list
 
 
-def images_to_video(images, frames, codec, out_path):
+def images_to_video(images, frames, w, h, codec, out_path):
     # 判断out_path是否存在,不存在则创建
     if not os.path.exists(os.path.dirname(out_path)):
         os.makedirs(os.path.dirname(out_path), exist_ok=True)
 
     # TODO: make macro_block_size dynamic, based on video size - see https://github.com/imageio/imageio-ffmpeg
     video = imageio.v2.get_writer(out_path, format='ffmpeg', mode='I', fps=frames, codec=codec, macro_block_size=1)
-    for image in images:
-        video.append_data(numpy.asarray(image))
-    video.close()
-    return out_path
+    is_valid_video = False
+    for i, image in enumerate(images):
+        # We could compare image dimensions to prevent "ValueError: All images in a movie should have same size" on invalid images
+        # but using "try" should be more efficient in this case
+        try:
+            # Append current frame
+            video.append_data(numpy.asarray(image))
+            is_valid_video = True
+        except:
+            # Skip current frame
+            print(f'Skipping frame {i+1} due to invalid image generation')
+    # Write final video
+    if is_valid_video is True:
+        video.close()
+        return out_path
+    else:
+        print('\nWarning: no frames were generated for the mov2mov video\n')
+        return None
+    
