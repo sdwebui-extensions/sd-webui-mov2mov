@@ -27,10 +27,20 @@ def process_mov2mov(p, mov_file, movie_frames, max_frames, resize_mode, w, h, ge
                     args):
     processing.fix_seed(p)
 
-    # Warn the user if ModNet is enabled without selecting a model, then disable it to prevent errors
-    if (modnet_enable) and (modnet_model is None or modnet_model.lower() == 'none'):
-      print('\nWarning: ModNet for mov2mov is enabled without selecting a model, skipping use of ModNet\n')
-      modnet_enable = False
+    # ModNet checks
+    if (modnet_enable):
+        # Warn the user if ModNet is enabled without selecting a model, then disable it to prevent errors
+        if modnet_model.lower() == 'none':
+          print('\nError: ModNet for mov2mov is enabled without selecting a model, please select a model for ModNet\n')
+          return
+        # Warn the user if ModNet image mode is enabled without selecting an image
+        if modnet_merge_background_mode == 3 and modnet_background_image is None:
+          print('\nError: ModNet for mov2mov is enabled in Image mode without a valid image, please select a valid image for ModNet\n')
+          return
+        # Warn the user if ModNet video mode is enabled without selecting a video
+        if modnet_merge_background_mode == 4 and modnet_background_movie is None:
+          print('\nError: ModNet for mov2mov is enabled in Video mode without a valid video, please select a valid video for ModNet\n')
+          return
 
     # 判断是不是多prompt
     re_prompts = re.findall(r'\*([0-9]+):(.*?)\|\|', p.prompt, re.DOTALL)
