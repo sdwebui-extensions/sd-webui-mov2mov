@@ -19,13 +19,13 @@ This extension for [AUTOMATIC1111/stable-diffusion-webui](https://github.com/AUT
 - Invalid or errored images no longer stop the entire video generation
 - General QoL improvements and bug fixes to the UI and scripts
 
-Eventual updates from the origin repo will be added as time allows
+Eventual updates from the origin repository will be added as time allows, changes will be merged upstream via pull requests when possible
 
 <br>
 
 ## Installation
 
-1. Start the Web UI and head to the `Extensions` tab
+1. Start the Web UI and go to the `Extensions` tab
 2. Click `Install from URL`
 3. Enter the URL `https://github.com/DavG25/sd-webui-mov2mov`
 4. Click `Install`
@@ -35,7 +35,7 @@ Eventual updates from the origin repo will be added as time allows
 
 ## Tutorials
 - Wiki
-  - Coming soon
+  - https://github.com/DavG25/sd-webui-mov2mov/wiki
 - Videos (in Chinese)：
   - https://www.bilibili.com/video/BV1Mo4y1a7DF
   - https://www.bilibili.com/video/BV1rY4y1C7Q5
@@ -44,5 +44,6 @@ Eventual updates from the origin repo will be added as time allows
 
 ## Credits
 
+- Mov2mov: https://github.com/Scholar01/sd-webui-mov2mov
 - MODNet-entry: https://github.com/RimoChan/modnet-entry
 - MODNet: https://github.com/ZHKKKe/MODNet
