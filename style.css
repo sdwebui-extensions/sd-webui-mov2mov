@@ -34,13 +34,8 @@
   gap: 0.4em;
 }
 
-#mov2mov_actions_column {
-  margin: 0.35rem 0.75rem 0.35rem 0;
-}
-
-#mov2mov_actions_column {
-  gap: 0;
-  margin-right: 0.75rem;
+#mov2mov_generate_box {
+  height: 100%;
 }
 
 #mov2mov_styles_row {
