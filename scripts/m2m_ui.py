@@ -216,7 +216,7 @@ def on_ui_tabs():
                     with gr.TabItem('Input video', id='mov2mov', elem_id=f"{html_id}_mov2mov_tab") as tab_mov2mov:
                         init_mov = gr.Video(label="Video for mov2mov", elem_id=f"{html_id}_mov", show_label=False,
                                             source="upload")  # .style(height=480)
-                        init_mov.change(None, None, None, _js="() => { startMov2movVideoHelper() }")
+                        init_mov.change(None, None, None, _js="() => { refreshMov2movVideoHelper() }")
 
                 # Video dimensions helper
                 with FormRow(elem_id="mov2mov_input_video_info"):
