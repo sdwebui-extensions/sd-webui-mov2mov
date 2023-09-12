@@ -27,7 +27,11 @@
 }
 
 #mov2mov_gallery img {
-  object-fit: scale-down;
+  object-fit: contain;
+}
+
+#mov2mov_results .progressDiv {
+  position: initial;
 }
 
 #mov2mov_tools {
