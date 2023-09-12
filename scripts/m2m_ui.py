@@ -11,7 +11,7 @@ from modules.sd_samplers import visible_sampler_names
 from modules.shared import opts
 from modules.ui import paste_symbol, clear_prompt_symbol, extra_networks_symbol, apply_style_symbol, save_style_symbol, \
     create_refresh_button, create_sampler_and_steps_selection, ordered_ui_categories, switch_values_symbol, \
-    create_seed_inputs, create_override_settings_dropdown
+    create_override_settings_dropdown
 from modules.ui_common import folder_symbol, plaintext_to_html
 from modules.ui_components import ToolButton, FormRow, FormGroup
 import modules.generation_parameters_copypaste as parameters_copypaste
@@ -281,10 +281,10 @@ def on_ui_tabs():
 
                     elif category == "seed":
                         max_frames = gr.Number(label='Max frames', value=-1, elem_id=f'{html_id}_max_frames')
-                        seed, reuse_seed, subseed, reuse_subseed, subseed_strength, seed_resize_from_h, seed_resize_from_w, seed_checkbox = create_seed_inputs(
-                            'mov2mov')
+                    #    seed, reuse_seed, subseed, reuse_subseed, subseed_strength, seed_resize_from_h, seed_resize_from_w, seed_checkbox = create_seed_inputs(
+                    #        'mov2mov')
 
-                        seed.style(container=False)
+                    #    seed.style(container=False)
 
                     elif category == "checkboxes":
                         with FormRow(elem_id=f"{html_id}_checkboxes", variant="compact"):
@@ -340,8 +340,8 @@ def on_ui_tabs():
                            denoising_strength,
                            movie_frames,
                            max_frames,
-                           seed,
-                           subseed, subseed_strength, seed_resize_from_h, seed_resize_from_w, seed_checkbox,
+                           # seed,
+                           # subseed, subseed_strength, seed_resize_from_h, seed_resize_from_w, seed_checkbox,
                            height,
                            width,
                            resize_mode,
