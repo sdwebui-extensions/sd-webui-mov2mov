@@ -6,7 +6,7 @@ import cv2
 from PIL import Image, ImageOps
 
 import modules.images
-from modules import shared, sd_samplers, processing
+from modules import shared, processing
 from modules.generation_parameters_copypaste import create_override_settings_dict
 from modules.processing import StableDiffusionProcessingImg2Img, process_images, Processed
 from modules.shared import opts, state
@@ -178,7 +178,7 @@ def mov2mov(id_task: str,
             negative_prompt,
             mov_file,
             steps,
-            sampler_index,
+            sampler,
             restore_faces,
             tiling,
             # extract_characters,
@@ -227,7 +227,7 @@ def mov2mov(id_task: str,
         seed_resize_from_h=seed_resize_from_h,
         seed_resize_from_w=seed_resize_from_w,
         seed_enable_extras=seed_enable_extras,
-        sampler_name=sd_samplers.samplers_for_img2img[sampler_index].name,
+        sampler_name=sampler,
         batch_size=1,
         n_iter=1,
         steps=steps,

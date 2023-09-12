@@ -7,7 +7,7 @@ import platform
 import modules.scripts as scripts
 from modules import script_callbacks, shared, ui_postprocessing, call_queue
 from modules.call_queue import wrap_gradio_gpu_call
-from modules.sd_samplers import samplers_for_img2img
+from modules.sd_samplers import visible_sampler_names
 from modules.shared import opts
 from modules.ui import paste_symbol, clear_prompt_symbol, extra_networks_symbol, apply_style_symbol, save_style_symbol, \
     create_refresh_button, create_sampler_and_steps_selection, ordered_ui_categories, switch_values_symbol, \
@@ -233,7 +233,7 @@ def on_ui_tabs():
 
                 for category in ordered_ui_categories():
                     if category == "sampler":
-                        steps, sampler_index = create_sampler_and_steps_selection(samplers_for_img2img, "mov2mov")
+                        steps, sampler = create_sampler_and_steps_selection(visible_sampler_names(), "mov2mov")
 
                     elif category == "dimensions":
                         with FormRow():
@@ -323,7 +323,7 @@ def on_ui_tabs():
                            mov2mov_negative_prompt,
                            init_mov,
                            steps,
-                           sampler_index,
+                           sampler,
                            restore_faces,
                            tiling,
                            # extract_characters,
