@@ -114,7 +114,7 @@ Requested path was: {f}
 
     with gr.Column(variant='panel', elem_id=f"{tabname}_results"):
         with gr.Group(elem_id=f"{tabname}_gallery_container"):
-            result_gallery = gr.Gallery(label='Output', show_label=False, elem_id=f"{tabname}_gallery").style(grid=4)
+            result_gallery = gr.Gallery(label='Output', show_label=False, elem_id=f"{tabname}_gallery")
             result_video = gr.Video(label='Output Video', show_label=False, elem_id=f'{tabname}_video', interactive=False)
 
         generation_info = None
@@ -160,8 +160,8 @@ Requested path was: {f}
 def create_modnet(html_id):
     with gr.Group():
         with gr.Accordion("ModNet", open=True):
-            background_image = gr.Image(label='Background', type='numpy', elem_id='modnet_background_image').style()
-            background_movie = gr.Video(label='Background', elem_id='modnet_background_movie').style()
+            background_image = gr.Image(label='Background', type='numpy', elem_id='modnet_background_image')
+            background_movie = gr.Video(label='Background', elem_id='modnet_background_movie')
             with gr.Row():
                 gr.HTML(
                     value='''
@@ -210,12 +210,12 @@ def on_ui_tabs():
         mov2mov_prompt, mov2mov_negative_prompt, submit = create_toprow()
 
         # create tabs
-        with FormRow().style(equal_height=False):
+        with FormRow(equal_height=False):
             with gr.Column(variant='compact', elem_id=f"{html_id}_settings"):
                 with gr.Tabs(elem_id=f"mode_{html_id}"):
                     with gr.TabItem('Input video', id='mov2mov', elem_id=f"{html_id}_mov2mov_tab") as tab_mov2mov:
                         init_mov = gr.Video(label="Video for mov2mov", elem_id=f"{html_id}_mov", show_label=False,
-                                            source="upload")  # .style(height=480)
+                                            source="upload")
                         init_mov.change(None, None, None, _js="() => { refreshMov2movVideoHelper() }")
 
                 # Video dimensions helper
