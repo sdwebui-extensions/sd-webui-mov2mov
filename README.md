@@ -3,13 +3,13 @@
 
 ![stable-diffusion-webui-mov2mov-extension](https://www.davg25.com/file/github-media/sd-webui-mov2mov/preview1.png)
 
-This extension for [AUTOMATIC1111/stable-diffusion-webui](https://github.com/AUTOMATIC1111/stable-diffusion-webui) is a fork of [mov2mov](https://github.com/Scholar01/sd-webui-mov2mov) with added features, bug fixes, improvements and translated to English
+This extension for [AUTOMATIC1111/stable-diffusion-webui](https://github.com/AUTOMATIC1111/stable-diffusion-webui) is a fork of [mov2mov](https://github.com/Scholar01/sd-webui-mov2mov) with added features, bug fixes, improvements, and translated to English
 
 
 ### Main features
 - Frame-by-frame processing
 - ControlNet and MODNet support
-- Automatic video creation
+- Automatic video generation
 - Pre-processing and post-processing features
 - Ability to process prompts individually for each frame
 
@@ -25,11 +25,13 @@ Eventual updates from the origin repository will be added as time allows, change
 
 ## Installation
 
-1. Start the Web UI and go to the `Extensions` tab
+If using a different fork of mov2mov, delete the previous mov2mov extension folder before following these steps
+
+1. Start the SD Web UI and go to the `Extensions` tab
 2. Click `Install from URL`
 3. Enter the URL `https://github.com/DavG25/sd-webui-mov2mov`
 4. Click `Install`
-5. Once the installation has finished, completely restart the Web UI (close it and launch it again)
+5. Once the installation has finished, completely restart the SD Web UI (close it and launch it again)
 
 <br>
 
