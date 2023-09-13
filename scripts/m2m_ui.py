@@ -227,7 +227,7 @@ def on_ui_tabs():
                     
 
                 with FormRow():
-                    resize_mode = gr.Radio(label="Resize mode", elem_id="resize_mode",
+                    resize_mode = gr.Radio(label="Resize mode", elem_id="mov2mov_input_video_resize_mode",
                                            choices=["Just resize", "Crop and resize", "Resize and fill",
                                                     "Just resize (latent upscale)"], type="index", value="Just resize")
 
