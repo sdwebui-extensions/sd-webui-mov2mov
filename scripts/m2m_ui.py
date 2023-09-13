@@ -7,11 +7,11 @@ import platform
 import modules.scripts as scripts
 from modules import script_callbacks, shared, ui_postprocessing, call_queue
 from modules.call_queue import wrap_gradio_gpu_call
-from modules.sd_samplers import samplers_for_img2img
+from modules.sd_samplers import visible_sampler_names
 from modules.shared import opts
 from modules.ui import paste_symbol, clear_prompt_symbol, extra_networks_symbol, apply_style_symbol, save_style_symbol, \
     create_refresh_button, create_sampler_and_steps_selection, ordered_ui_categories, switch_values_symbol, \
-    create_seed_inputs, create_override_settings_dropdown
+    create_override_settings_dropdown
 from modules.ui_common import folder_symbol, plaintext_to_html
 from modules.ui_components import ToolButton, FormRow, FormGroup
 import modules.generation_parameters_copypaste as parameters_copypaste
@@ -114,7 +114,7 @@ Requested path was: {f}
 
     with gr.Column(variant='panel', elem_id=f"{tabname}_results"):
         with gr.Group(elem_id=f"{tabname}_gallery_container"):
-            result_gallery = gr.Gallery(label='Output', show_label=False, elem_id=f"{tabname}_gallery").style(grid=4)
+            result_gallery = gr.Gallery(label='Output', show_label=False, elem_id=f"{tabname}_gallery", columns=1, height=480)
             result_video = gr.Video(label='Output Video', show_label=False, elem_id=f'{tabname}_video', interactive=False)
 
         generation_info = None
@@ -160,8 +160,8 @@ Requested path was: {f}
 def create_modnet(html_id):
     with gr.Group():
         with gr.Accordion("ModNet", open=True):
-            background_image = gr.Image(label='Background', type='numpy', elem_id='modnet_background_image').style()
-            background_movie = gr.Video(label='Background', elem_id='modnet_background_movie').style()
+            background_image = gr.Image(label='Background', type='numpy', elem_id='modnet_background_image')
+            background_movie = gr.Video(label='Background', elem_id='modnet_background_movie')
             with gr.Row():
                 gr.HTML(
                     value='''
@@ -210,12 +210,12 @@ def on_ui_tabs():
         mov2mov_prompt, mov2mov_negative_prompt, submit = create_toprow()
 
         # create tabs
-        with FormRow().style(equal_height=False):
+        with FormRow(equal_height=False):
             with gr.Column(variant='compact', elem_id=f"{html_id}_settings"):
                 with gr.Tabs(elem_id=f"mode_{html_id}"):
                     with gr.TabItem('Input video', id='mov2mov', elem_id=f"{html_id}_mov2mov_tab") as tab_mov2mov:
                         init_mov = gr.Video(label="Video for mov2mov", elem_id=f"{html_id}_mov", show_label=False,
-                                            source="upload")  # .style(height=480)
+                                            source="upload")
                         init_mov.change(None, None, None, _js="() => { refreshMov2movVideoHelper() }")
 
                 # Video dimensions helper
@@ -233,7 +233,7 @@ def on_ui_tabs():
 
                 for category in ordered_ui_categories():
                     if category == "sampler":
-                        steps, sampler_index = create_sampler_and_steps_selection(samplers_for_img2img, "mov2mov")
+                        steps, sampler = create_sampler_and_steps_selection(visible_sampler_names(), "mov2mov")
 
                     elif category == "dimensions":
                         with FormRow():
@@ -281,10 +281,10 @@ def on_ui_tabs():
 
                     elif category == "seed":
                         max_frames = gr.Number(label='Max frames', value=-1, elem_id=f'{html_id}_max_frames')
-                        seed, reuse_seed, subseed, reuse_subseed, subseed_strength, seed_resize_from_h, seed_resize_from_w, seed_checkbox = create_seed_inputs(
-                            'mov2mov')
+                    #    seed, reuse_seed, subseed, reuse_subseed, subseed_strength, seed_resize_from_h, seed_resize_from_w, seed_checkbox = create_seed_inputs(
+                    #        'mov2mov')
 
-                        seed.style(container=False)
+                    #    seed.style(container=False)
 
                     elif category == "checkboxes":
                         with FormRow(elem_id=f"{html_id}_checkboxes", variant="compact"):
@@ -323,7 +323,7 @@ def on_ui_tabs():
                            mov2mov_negative_prompt,
                            init_mov,
                            steps,
-                           sampler_index,
+                           sampler,
                            restore_faces,
                            tiling,
                            # extract_characters,
@@ -340,8 +340,8 @@ def on_ui_tabs():
                            denoising_strength,
                            movie_frames,
                            max_frames,
-                           seed,
-                           subseed, subseed_strength, seed_resize_from_h, seed_resize_from_w, seed_checkbox,
+                           # seed,
+                           # subseed, subseed_strength, seed_resize_from_h, seed_resize_from_w, seed_checkbox,
                            height,
                            width,
                            resize_mode,

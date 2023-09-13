@@ -39,8 +39,8 @@ def create_modnet():
     ctrls = ()
     with gr.Group():
         with gr.Accordion("ModNet for mov2mov", open=True):
-            background_image = gr.Image(label='Background', type='numpy', elem_id='modnet_background_image').style()
-            background_movie = gr.Video(label='Background', elem_id='modnet_background_movie').style()
+            background_image = gr.Image(label='Background', type='numpy', elem_id='modnet_background_image')
+            background_movie = gr.Video(label='Background', elem_id='modnet_background_movie')
             enable = gr.Checkbox(label='Enable', value=False, )
             ctrls += (background_image, background_movie, enable)
             with gr.Row():
