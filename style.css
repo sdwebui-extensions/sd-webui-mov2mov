@@ -150,3 +150,8 @@
   white-space: nowrap;
   min-width: auto;
 }
+
+#mov2mov_res_switch_btn {
+  margin-top: 25%;
+  align-self: auto;
+}
