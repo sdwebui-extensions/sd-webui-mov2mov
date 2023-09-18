@@ -15,6 +15,9 @@ from scripts.m2m_util import get_mov_all_images, images_to_video
 from scripts.m2m_config import mov2mov_outpath_samples, mov2mov_output_dir
 from modules.ui import plaintext_to_html
 from scripts.m2m_modnet import get_model, infer, infer2
+import requests
+import json
+from modules.api.api import decode_base64_to_image
 
 
 def process_mov2mov(p, mov_file, movie_frames, max_frames, resize_mode, w, h, generate_mov_mode,
@@ -207,6 +210,23 @@ def mov2mov(id_task: str,
         print('Error: mov2mov generation was started without a valid video, please select a valid input video for mov2mov')
         return
 
+    if shared.cmd_opts.just_ui:
+        override_settings_text.append(f'sd_model_checkpoint: {shared.sd_model.sd_checkpoint_info.model_name}')
+        override_settings_text.append(f'sd_vae: {shared.sd_model.sd_checkpoint_info.model_name}')
+        override_settings_text.append(f'outpath_samples: {shared.opts.data.get("mov2mov_outpath_samples", mov2mov_outpath_samples)}')
+        override_settings_text.append(f'outpath_grids: {opts.outdir_grids or opts.outdir_img2img_grids}')
+        req_dict = {"args":[id_task, prompt, negative_prompt, mov_file, steps, sampler, restore_faces, tiling,
+            modnet_enable, modnet_background_image, modnet_background_movie, modnet_model, modnet_resize_mode,
+            modnet_merge_background_mode, modnet_movie_frames, generate_mov_mode, noise_multiplier, cfg_scale,
+            image_cfg_scale, denoising_strength, movie_frames, max_frames, height, width, resize_mode, override_settings_text, 
+            *args]}
+        result = requests.post('/'.join([shared.cmd_opts.server_path, 'mov2mov/process']), json=req_dict)
+        if result.status_code == 200:
+            result = json.loads(result.text)
+            return [decode_base64_to_image(img_b64) for img_b64 in result['images']], result['generate_video_path'], \
+                result['generation_info_js'], result['info'], result['comments']
+        else:
+            raise f"run id_task {id_task} failed with {result.text}"
     override_settings = create_override_settings_dict(override_settings_text)
     assert 0. <= denoising_strength <= 1., 'can only work with strength in [0.0, 1.0]'
     mask_blur = 4
@@ -214,10 +234,12 @@ def mov2mov(id_task: str,
     inpaint_full_res = False
     inpaint_full_res_padding = 32
     inpainting_mask_invert = 0
+    outpath_samples = override_settings.pop('outpath_samples', shared.opts.data.get("mov2mov_outpath_samples", mov2mov_outpath_samples))
+    outpath_grids = override_settings.pop('outpath_grids', opts.outdir_grids or opts.outdir_img2img_grids)
     p = StableDiffusionProcessingImg2Img(
         sd_model=shared.sd_model,
-        outpath_samples=shared.opts.data.get("mov2mov_outpath_samples", mov2mov_outpath_samples),
-        outpath_grids=opts.outdir_grids or opts.outdir_img2img_grids,
+        outpath_samples=outpath_samples,
+        outpath_grids=outpath_grids,
         prompt=prompt,
         negative_prompt=negative_prompt,
         styles=[],
