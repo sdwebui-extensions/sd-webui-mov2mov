@@ -2,6 +2,10 @@ import os
 import hashlib
 import launch
 import modules.paths as ph
+from modules import cmd_args
+
+parser = cmd_args.parser
+cmd_opts, _ = parser.parse_known_args()
 
 # Install requirements if not installed
 req_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), "requirements.txt")
@@ -12,7 +16,7 @@ with open(req_file) as file:
             launch.run_pip(f"install {lib}", f"requirement for mov2mov: {lib}")
 
 # Download ModNet models if not present
-modnet_models_path = ph.models_path + '/mov2mov-ModNet'
+modnet_models_path = cmd_opts.data_dir + '/models/mov2mov-ModNet'
 
 modnet_photographic_path = f"{modnet_models_path}/modnet_photographic_portrait_matting.ckpt"
 modnet_webcam_path = f"{modnet_models_path}/modnet_webcam_portrait_matting.ckpt"
