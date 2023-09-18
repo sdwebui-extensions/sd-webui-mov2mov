@@ -12,12 +12,14 @@ import torch.nn.functional as F
 import torchvision.transforms as transforms
 import modules.paths as ph
 from scripts.modnet.modnet import MODNet
+from modules.shared import cmd_opts
 
 """
 from modnet-entry("https://github.com/RimoChan/modnet-entry")
 """
-
-modnet_models_path = ph.models_path + '/mov2mov-ModNet'
+modnet_models_path = f'{cmd_opts.data_dir}/models/mov2mov-ModNet'
+if os.environ.get('SERVICE_NAME', '') != '' and cmd_opts.just_ui:
+    modnet_models_path = f'{os.path.dirname(cmd_opts.data_dir)}/models/mov2mov-ModNet'
 modnet_models = ['none'] + [model for model in os.listdir(modnet_models_path) if model.endswith('.ckpt')]
 
 
