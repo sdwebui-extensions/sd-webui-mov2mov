@@ -315,8 +315,8 @@ def mov2mov(id_task: str,
     override_settings = create_override_settings_dict(override_settings_text)
     tmp_dict = {}
     for txt_pair in override_settings_text:
-        for k, v in txt_pair.split(":", maxsplit=1):
-            tmp_dict[k] = v.strip()
+        k, v = txt_pair.split(":", maxsplit=1)
+        tmp_dict[k] = v.strip()
     for key in ['outpath_samples', 'outpath_grids', 'sd_model_checkpoint', 'sd_vae']:
         if key in tmp_dict:
             override_settings[key] = tmp_dict[key]
