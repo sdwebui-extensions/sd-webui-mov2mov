@@ -10,9 +10,9 @@ from modules.call_queue import wrap_gradio_gpu_call
 try:
     from modules.sd_samplers import visible_sampler_names
 except:
-    from modules.sd_samplers import all_samplers_map
+    from modules.sd_samplers import all_samplers
     def visible_sampler_names():
-        return list(all_samplers_map.keys())
+        return all_samplers
 from modules.shared import opts
 from modules.ui import paste_symbol, clear_prompt_symbol, extra_networks_symbol, apply_style_symbol, save_style_symbol, \
     create_refresh_button, create_sampler_and_steps_selection, ordered_ui_categories, switch_values_symbol, \
