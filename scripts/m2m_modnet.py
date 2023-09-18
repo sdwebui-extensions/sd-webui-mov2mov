@@ -20,6 +20,7 @@ from modnet-entry("https://github.com/RimoChan/modnet-entry")
 modnet_models_path = f'{cmd_opts.data_dir}/models/mov2mov-ModNet'
 if os.environ.get('SERVICE_NAME', '') != '' and cmd_opts.just_ui:
     modnet_models_path = f'{os.path.dirname(cmd_opts.data_dir)}/models/mov2mov-ModNet'
+os.makedirs(modnet_models_path, exist_ok=True)
 modnet_models = ['none'] + [model for model in os.listdir(modnet_models_path) if model.endswith('.ckpt')]
 
 
