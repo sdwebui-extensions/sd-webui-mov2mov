@@ -313,6 +313,13 @@ def mov2mov(id_task: str,
             raise f"run id_task {id_task} failed with {result.text}"
     shared.state.id_task = id_task
     override_settings = create_override_settings_dict(override_settings_text)
+    tmp_dict = {}
+    for txt_pair in override_settings_text:
+        for k, v in txt_pair.split(":", maxsplit=1):
+            tmp_dict[k] = v.strip()
+    for key in ['outpath_samples', 'outpath_grids', 'sd_model_checkpoint', 'sd_vae']:
+        if key in tmp_dict:
+            override_settings[key] = tmp_dict[key]
     assert 0. <= denoising_strength <= 1., 'can only work with strength in [0.0, 1.0]'
     mask_blur = 4
     inpainting_fill = 1
