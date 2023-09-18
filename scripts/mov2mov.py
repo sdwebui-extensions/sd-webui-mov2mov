@@ -29,6 +29,9 @@ except:
     def visible_sampler_names():
         return all_samplers
 
+import modules.sd_models as sd_models
+import modules.sd_vae as sd_vae
+
 
 def process_mov2mov(p, mov_file, movie_frames, max_frames, resize_mode, w, h, generate_mov_mode,
                     # extract_characters,
@@ -353,6 +356,14 @@ def mov2mov(id_task: str,
         override_settings=override_settings,
         initial_noise_multiplier=noise_multiplier
     )
+    for k, v in p.override_settings.items():
+        setattr(opts, k, v)
+
+        if k == 'sd_model_checkpoint':
+            sd_models.reload_model_weights()
+
+        if k == 'sd_vae':
+            sd_vae.reload_vae_weights()
 
     p.scripts = scripts.scripts_img2img
     p.script_args = args
