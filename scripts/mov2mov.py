@@ -18,6 +18,16 @@ from scripts.m2m_modnet import get_model, infer, infer2
 import requests
 import json
 from modules.api.api import decode_base64_to_image
+import tempfile
+from modules.shared import encode_image_to_base64
+from enum import Enum
+import numpy as np
+try:
+    from modules.sd_samplers import visible_sampler_names
+except:
+    from modules.sd_samplers import all_samplers
+    def visible_sampler_names():
+        return all_samplers
 
 
 def process_mov2mov(p, mov_file, movie_frames, max_frames, resize_mode, w, h, generate_mov_mode,
@@ -209,17 +219,88 @@ def mov2mov(id_task: str,
     if not mov_file:
         print('Error: mov2mov generation was started without a valid video, please select a valid input video for mov2mov')
         return
+    if isinstance(sampler, int):
+        sampler = visible_sampler_names()[sampler].name
 
     if shared.cmd_opts.just_ui:
         override_settings_text.append(f'sd_model_checkpoint: {shared.sd_model.sd_checkpoint_info.model_name}')
         override_settings_text.append(f'sd_vae: {shared.sd_model.sd_checkpoint_info.model_name}')
         override_settings_text.append(f'outpath_samples: {shared.opts.data.get("mov2mov_outpath_samples", mov2mov_outpath_samples)}')
         override_settings_text.append(f'outpath_grids: {opts.outdir_grids or opts.outdir_img2img_grids}')
+        if not mov_file.startswith(shared.cmd_opts.data_dir):
+            os.makedirs(f'{shared.cmd_opts.data_dir}/outputs/mov2mov/videos', exist_ok=True)
+            os.system(f"cp {mov_file} {shared.cmd_opts.data_dir}/outputs/mov2mov/videos/{mov_file.split('/')[-1]}")
+            mov_file = f"{shared.cmd_opts.data_dir}/outputs/mov2mov/videos/{mov_file.split('/')[-1]}"
         req_dict = {"args":[id_task, prompt, negative_prompt, mov_file, steps, sampler, restore_faces, tiling,
             modnet_enable, modnet_background_image, modnet_background_movie, modnet_model, modnet_resize_mode,
             modnet_merge_background_mode, modnet_movie_frames, generate_mov_mode, noise_multiplier, cfg_scale,
-            image_cfg_scale, denoising_strength, movie_frames, max_frames, height, width, resize_mode, override_settings_text, 
-            *args]}
+            image_cfg_scale, denoising_strength, movie_frames, max_frames, height, width, resize_mode, override_settings_text]}
+        alwayson_args = {}
+        for alwayson_scripts in modules.scripts.scripts_img2img.alwayson_scripts:
+            if alwayson_scripts.name is None:
+                continue
+            alwayson_args[alwayson_scripts.name] = {}
+            alwayson_args[alwayson_scripts.name]['args'] = []
+            for _arg in args[alwayson_scripts.args_from:alwayson_scripts.args_to]:
+                if alwayson_scripts.name=='controlnet':
+                    if isinstance(_arg, dict):
+                        cn_dict = _arg
+                    else:
+                        cn_dict = vars(_arg)
+                    for cn_key, cn_val in cn_dict.items():
+                        if isinstance(cn_val, Enum):
+                            cn_val = cn_val.value
+                        elif (cn_key == 'image') and (isinstance(cn_val, dict)):
+                            if cn_val.get('image', None) is not None:
+                                cn_val['image'] = encode_image_to_base64(cn_val['image'])
+                            if cn_val.get('mask', None) is not None:
+                                cn_val['mask'] = encode_image_to_base64(cn_val['mask'])
+                        elif (cn_key == 'image') and (isinstance(cn_val, (np.ndarray, Image.Image, str))):
+                            cn_val = encode_image_to_base64(cn_val)
+                        elif cn_key=='model' and cn_val:
+                            cn_val = cn_val.split(' ')[0]
+                        cn_dict[cn_key] = cn_val
+                    alwayson_args[alwayson_scripts.name]['args'].append(cn_dict)
+                elif isinstance(_arg, (int, float, str, bool)):
+                    alwayson_args[alwayson_scripts.name]['args'].append(_arg)
+                elif isinstance(_arg, Enum):
+                    alwayson_args[alwayson_scripts.name]['args'].append(_arg.value)
+                elif isinstance(_arg, Image.Image):
+                    alwayson_args[alwayson_scripts.name]['args'].append(encode_image_to_base64(_arg))
+                elif isinstance(_arg, tempfile._TemporaryFileWrapper):
+                    filename = _arg.name
+                    if filename.endswith(('.png', '.jpg')):
+                        alwayson_args[alwayson_scripts.name]['args'].append(encode_image_to_base64(Image.open(filename)))
+                    else:
+                        print(f'mov2mov {alwayson_scripts.name} {filename} is not a image, will be droped')
+                        alwayson_args[alwayson_scripts.name]['args'].append(filename)
+                elif isinstance(_arg, list):
+                    _arg_list = []
+                    for tmp_arg in _arg:
+                        if isinstance(tmp_arg, tempfile._TemporaryFileWrapper):
+                            filename = tmp_arg.name
+                            if filename.endswith(('.png', '.jpg')):
+                                _arg_list.append(encode_image_to_base64(Image.open(filename)))
+                            else:
+                                _arg_list.append(filename)
+                        elif isinstance(tmp_arg, (int, float, str, bool)):
+                            _arg_list.append(tmp_arg)
+                        elif isinstance(tmp_arg, Image.Image):
+                            _arg_list.append(encode_image_to_base64(tmp_arg))
+                        else:
+                            try:
+                                json.dumps(tmp_arg)
+                                _arg_list.append(tmp_arg)
+                            except Exception as e:
+                                print(f'mov2mov {alwayson_scripts.title().lower()} {_arg} some args are not in [int, float, str, bool]')
+                    alwayson_args[alwayson_scripts.title().lower()]['args'].append(_arg_list)
+                else:
+                    try:
+                        json.dumps(_arg)
+                        alwayson_args[alwayson_scripts.name]['args'].append(_arg)
+                    except Exception as e:
+                        print(f'mov2mov {alwayson_scripts.name} {_arg} some args are not in [int, float, str, bool], {e}')
+        req_dict['alwayson_args'] = alwayson_args
         result = requests.post('/'.join([shared.cmd_opts.server_path, 'mov2mov/process']), json=req_dict)
         if result.status_code == 200:
             result = json.loads(result.text)
@@ -227,6 +308,7 @@ def mov2mov(id_task: str,
                 result['generation_info_js'], result['info'], result['comments']
         else:
             raise f"run id_task {id_task} failed with {result.text}"
+    shared.state.id_task = id_task
     override_settings = create_override_settings_dict(override_settings_text)
     assert 0. <= denoising_strength <= 1., 'can only work with strength in [0.0, 1.0]'
     mask_blur = 4
