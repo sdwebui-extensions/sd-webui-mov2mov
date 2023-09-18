@@ -17,6 +17,7 @@ with open(req_file) as file:
 
 # Download ModNet models if not present
 modnet_models_path = cmd_opts.data_dir + '/models/mov2mov-ModNet'
+os.makedirs(modnet_models_path, exist_ok=True)
 
 if os.environ.get('SERVICE_NAME', '') != '' and cmd_opts.just_ui:
     modnet_models_path = os.path.dirname(cmd_opts.data_dir) + '/models/mov2mov-ModNet'
