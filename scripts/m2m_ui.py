@@ -25,7 +25,8 @@ from scripts import mov2mov
 from scripts.m2m_config import mov2mov_outpath_samples, mov2mov_output_dir
 from scripts.m2m_modnet import modnet_models
 from fastapi import FastAPI
-from modules.api.api import encode_pil_to_base64
+from modules.api.api import encode_pil_to_base64, script_name_to_index
+from modules import ui
 
 html_id = "mov2mov"
 
@@ -375,15 +376,66 @@ def on_ui_settings():
         mov2mov_outpath_samples, "Mov2Mov output path for image", section=section))  # 图片保存路径
     shared.opts.add_option("mov2mov_output_dir", shared.OptionInfo(
         mov2mov_output_dir, "Mov2Mov output path for video", section=section))  # 视频保存路径
-    
+
+def init_default_script_args(script_runner):
+    #find max idx from the scripts in runner and generate a none array to init script_args
+    last_arg_index = 1
+    for script in script_runner.scripts:
+        if last_arg_index < script.args_to:
+            last_arg_index = script.args_to
+    # None everywhere except position 0 to initialize script args
+    script_args = [None]*last_arg_index
+    script_args[0] = 0
+
+    # get default values
+    with gr.Blocks(): # will throw errors calling ui function without this
+        for script in script_runner.scripts:
+            if script.ui(script.is_img2img):
+                ui_default_values = []
+                for elem in script.ui(script.is_img2img):
+                    ui_default_values.append(elem.value)
+                script_args[script.args_from:script.args_to] = ui_default_values
+    return script_args
+
+def get_script(script_name, script_runner):
+    if script_name is None or script_name == "":
+        return None
+
+    try:
+        script_idx = script_name_to_index(script_name, script_runner.scripts)
+    except Exception as e:
+        return None
+    return script_runner.scripts[script_idx]
+
+def init_script_args(alwayson_scripts, default_script_args, script_runner):
+    script_args = default_script_args.copy()
+
+    # Now check for always on scripts
+    if alwayson_scripts:
+        for alwayson_script_name in alwayson_scripts.keys():
+            alwayson_script = get_script(alwayson_script_name, script_runner)
+            if alwayson_script is None:
+                continue
+            # always on script with no arg should always run so you don't really need to add them to the requests
+            if "args" in alwayson_scripts[alwayson_script_name]:
+                # min between arg length in scriptrunner and arg length in the request
+                for idx in range(0, min((alwayson_script.args_to - alwayson_script.args_from), len(alwayson_scripts[alwayson_script_name]["args"]))):
+                    script_args[alwayson_script.args_from + idx] = alwayson_scripts[alwayson_script_name]["args"][idx]
+    return script_args
 
 def mov2mov_api(_: gr.Blocks, app: FastAPI):
     @app.post("/mov2mov/process")
     def detect(
         mov2mov_req: dict = {}
     ):
+        alwayson_args = mov2mov_req['alwayson_args']
+        if not scripts.scripts_img2img.scripts:
+            scripts.scripts_img2img.initialize_scripts(True)
+            ui.create_ui()
+        default_args = init_default_script_args(scripts.scripts_img2img)
+        mov2mov_req["args"] += init_script_args(alwayson_args, default_args, scripts.scripts_img2img)
         fn=wrap_gradio_gpu_call(mov2mov.mov2mov, extra_outputs=[None, '', ''])
-        images, generate_video_path, generation_info_js, info, comments = fn(tuple(mov2mov_req["args"]))
+        images, generate_video_path, generation_info_js, info, comments = fn(*mov2mov_req["args"])
         imgs_b64 = [encode_pil_to_base64(img) for img in images]
         return {"images": imgs_b64, "generate_video_path": generate_video_path, "generation_info_js": generation_info_js,
                 "info": info, "comments": comments}
