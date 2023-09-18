@@ -19,6 +19,8 @@ import subprocess as sp
 from scripts import mov2mov
 from scripts.m2m_config import mov2mov_outpath_samples, mov2mov_output_dir
 from scripts.m2m_modnet import modnet_models
+from fastapi import FastAPI
+from modules.api.api import encode_pil_to_base64
 
 html_id = "mov2mov"
 
@@ -368,7 +370,20 @@ def on_ui_settings():
         mov2mov_outpath_samples, "Mov2Mov output path for image", section=section))  # 图片保存路径
     shared.opts.add_option("mov2mov_output_dir", shared.OptionInfo(
         mov2mov_output_dir, "Mov2Mov output path for video", section=section))  # 视频保存路径
+    
+
+def mov2mov_api(_: gr.Blocks, app: FastAPI):
+    @app.post("/mov2mov/process")
+    def detect(
+        mov2mov_req: dict = {}
+    ):
+        fn=wrap_gradio_gpu_call(mov2mov.mov2mov, extra_outputs=[None, '', ''])
+        images, generate_video_path, generation_info_js, info, comments = fn(tuple(mov2mov_req["args"]))
+        imgs_b64 = [encode_pil_to_base64(img) for img in images]
+        return {"images": imgs_b64, "generate_video_path": generate_video_path, "generation_info_js": generation_info_js,
+                "info": info, "comments": comments}
 
 
 script_callbacks.on_ui_settings(on_ui_settings)  # 注册进设置页
 script_callbacks.on_ui_tabs(on_ui_tabs)
+script_callbacks.on_app_started(mov2mov_api)
